@@ -4,24 +4,24 @@
 class PID {
 public:
     double input, output, setpoint;
-    double error_sum, last_error;
+    double errorSum, lastError;
     double _kp, _ki, _kd;
-    double time_diff;
+    double timeDiff;
 
     bool isPActive, isIActive, isDActive;
 
     void compute() {
         double error = input - setpoint;
-        error_sum += (error * time_diff);
-        double diff_error = (error - last_error);
+        errorSum += (error * timeDiff);
+        double diff_error = (error - lastError);
 
         double P = _kp * error;
-        double I = _ki * error_sum;
+        double I = _ki * errorSum;
         double D = _kd * diff_error;
 
         output = P*isPActive + I*isIActive + D*isDActive;
 
-        last_error = error;
+        lastError = error;
     }
 
     void set_tunings(double kp, double ki, double kd) {
@@ -77,7 +77,7 @@ void loop() {
   bool onlySetup = false;
 
   if ((distance < 50 || distance < 0) && !onlySetup) {
-    double time_diff = (double)(now - last_time);
+    double timeDiff = (double)(now - last_time);
 
     avgDistance += distance;
     kp += modifiedMap(analogRead(pKP), 0, 1023, 0, 10);
@@ -85,12 +85,12 @@ void loop() {
     kd += modifiedMap(analogRead(pKD), 0, 1023, 0, 10);
     numberOfSamples++;
     
-    if (time_diff >= sampleRate) {
+    if (timeDiff >= sampleRate) {
       pid._kp = kp/numberOfSamples;
       pid._ki = ki/numberOfSamples;
       pid._kd = kd/numberOfSamples;
       pid.input = avgDistance/numberOfSamples;
-      pid.time_diff = time_diff;
+      pid.timeDiff = timeDiff;
       
       pid.compute();
       double servoValue = modifiedMap(pid.output, -250, 250, 10, 170);
